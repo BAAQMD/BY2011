@@ -1,0 +1,19 @@
+Package: BY2011
+Type: Package
+Title: Provides BY2011 Emission Inventory Datasets
+Version: 2019.11.21
+Author: David Holstius
+Maintainer: David Holstius <dholstius@baaqmd.gov>
+Description: Provides BY2011 datasets and vignettes.
+License: What license is it under?
+Depends:
+  tbltools,
+  qtytools,
+  yeartools
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.0.0
+Suggests: 
+    testthat (>= 2.1.0),
+    inventory
+VignetteBuilder: knitr

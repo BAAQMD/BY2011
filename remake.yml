@@ -1,0 +1,146 @@
+#
+# This is a `remake`-driven subfolder of BY2011, and this is its Makefile.
+#
+# Created by David Holstius <dholstius@baaqmd.gov> on 2019-08-22.
+#
+
+packages:
+  - tbltools
+  - qtytools
+  - maketools
+  - ensurer
+  - DataBank
+
+sources:
+  - "data-raw/Make/make_BY2011_category_data.R"
+  - "data-raw/Make/make_BY2011_annual_emission_data.R"
+  - "data-raw/Make/make_BY2011_annual_point_source_emission_data.R"
+  - "data-raw/Make/make_BY2011_annual_area_source_emission_data.R"
+  - "data-raw/Make/make_BY2011_annual_motor_vehicle_emission_data.R"
+  - "data-raw/Make/make_BY2011_county_fraction_data.R"
+  - "data-raw/Make/make_BY2011_speciation_data.R"
+  - "data-raw/Make/make_BY2011_legacy.R"
+  - "data-raw/Make/make_BY2011_pollutant_data.R"
+  - "data-raw/Make/apportion_to_counties.R"
+  - "data-raw/Make/speciate_TOG_and_PM.R"
+  - "data-raw/Make/speciate_pollutant.R"
+
+targets:
+
+  all:
+    depends:
+      - tidy_data
+      - legacy_data
+
+  legacy_data:
+    depends:
+      - "data/BY2011_legacy_data.rda"
+
+  "data/BY2011_legacy_data.rda":
+    command: file.copy(
+      "data-raw/BY2011_legacy_data.rda",
+      "data/BY2011_legacy_data.rda")
+
+  tidy_data:
+    depends:
+      - "data/BY2011_category_hierarchy.rda"
+      - "data/BY2011_category_staff_data.rda"
+      - "data/BY2011_annual_emission_data.rda"
+      - "data/BY2011_GHG_pollutant_data.rda"
+      - "data/BY2011_TOG_speciation_data.rda"
+      - "data/BY2011_PM_speciation_data.rda"
+      - "data/BY2011_county_fraction_data.rda"
+
+  "data/BY2011_category_hierarchy.rda":
+    command: use_data(BY2011_category_hierarchy, overwrite = TRUE)
+
+  "data/BY2011_category_staff_data.rda":
+    command: use_data(BY2011_category_staff_data, overwrite = TRUE)
+
+  "data/BY2011_annual_emission_data.rda":
+    command: use_data(BY2011_annual_emission_data, overwrite = TRUE)
+
+  "data/BY2011_TOG_speciation_data.rda":
+    command: use_data(BY2011_TOG_speciation_data, overwrite = TRUE)
+
+  "data/BY2011_PM_speciation_data.rda":
+    command: use_data(BY2011_PM_speciation_data, overwrite = TRUE)
+
+  "data/BY2011_county_fraction_data.rda":
+    command: use_data(BY2011_county_fraction_data, overwrite = TRUE)
+
+  "data/BY2011_GHG_pollutant_data.rda":
+    command: use_data(BY2011_GHG_pollutant_data, overwrite = TRUE)
+
+  BY2011_category_staff_data:
+    command: make_BY2011_category_staff_data(
+      BY2011_category_hierarchy)
+
+  BY2011_category_hierarchy:
+    command: make_BY2011_category_hierarchy(
+      BY2011_legacy_env)
+
+  BY2011_GHG_pollutant_data:
+    command: make_BY2011_GHG_pollutant_data(
+      BY2011_legacy_env)
+
+  BY2011_legacy_env:
+    command: make_BY2011_legacy_env(
+      "data-raw/BY2011_legacy_data.rda")
+
+  BY2011_annual_emission_data:
+    command: make_BY2011_annual_emission_data(
+      BY2011_annual_point_source_emission_data,
+      BY2011_annual_area_source_emission_data,
+      BY2011_annual_motor_vehicle_emission_data,
+      BY2011_TOG_speciation_data,
+      BY2011_PM_speciation_data)
+
+  intermediates:
+    depends:
+      - BY2011_annual_area_source_emission_data
+      - BY2011_annual_point_source_emission_data
+      - BY2011_annual_motor_vehicle_emission_data
+
+  BY2011_annual_motor_vehicle_emission_data:
+    command: make_BY2011_annual_motor_vehicle_emission_data(
+      "data-raw/BY2011-annual-M.csv")
+
+  BY2011_annual_area_source_emission_data:
+    command: make_BY2011_annual_area_source_emission_data(
+      BY2011_annual_area_source_CAP_and_GHG_emission_data,
+      BY2011_annual_area_source_SF6_emission_data,
+      BY2011_county_fraction_data)
+
+  BY2011_annual_point_source_emission_data:
+    command: make_BY2011_annual_point_source_emission_data(
+      BY2011_annual_point_source_CAP_and_GHG_emission_data,
+      BY2011_annual_point_source_SF6_emission_data,
+      BY2011_county_fraction_data)
+
+  BY2011_annual_point_source_CAP_and_GHG_emission_data:
+    command: make_BY2011_annual_point_source_CAP_and_GHG_emission_data(
+      "data-raw/BY2011-annual-P.csv")
+
+  BY2011_annual_point_source_SF6_emission_data:
+    command: make_BY2011_annual_point_source_SF6_emission_data(
+      "data-raw/BY2011-annual-P-SF6.xlsx")
+
+  BY2011_TOG_speciation_data:
+    command: make_BY2011_TOG_speciation_data(
+      "data-raw/FROG11BY11.csv")
+
+  BY2011_PM_speciation_data:
+    command: make_BY2011_PM_speciation_data(
+      "data-raw/TFPM1011_BY11.csv")
+
+  BY2011_annual_area_source_CAP_and_GHG_emission_data:
+    command: make_BY2011_annual_area_source_CAP_and_GHG_emission_data(
+      "data-raw/BY2011-annual-A.csv")
+
+  BY2011_annual_area_source_SF6_emission_data:
+    command: make_BY2011_annual_area_source_SF6_emission_data(
+      "data-raw/BY2011-annual-A-SF6.xlsx")
+
+  BY2011_county_fraction_data:
+    command: make_BY2011_county_fraction_data()
