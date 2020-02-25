@@ -32,13 +32,11 @@ make_RY2011_annual_point_source_emission_data <- function (
     sum_annual_emissions_by(
       pol_abbr, cat_id, cnty_abbr)
 
-  msg("filtering for ems_qty > 0")
   filtered <-
     summed_by_county %>%
     mutate(
       year = parse_number(year)) %>%
     filter(
-      ems_qty > 0,
       elide_year(year) %>% between(1990, 2030))
 
   validated <-

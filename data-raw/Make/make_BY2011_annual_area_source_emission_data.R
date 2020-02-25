@@ -18,14 +18,17 @@ make_BY2011_annual_area_source_CAP_and_GHG_emission_data <- function (
       col_types = "icicdddddddddd",
       verbose = TRUE) %>%
     ensurer::ensure(
-      all_true(.$season == "Annual"),
-      all_true(.$cat_type == "Area"))
+      all_true(
+        .$season == "Annual",
+        .$cat_type == "Area"))
 
   BY2011_annual_area_source_CAP_and_GHG_emission_data <- local({
 
-    renamed <-
+    renamed_data <-
       csv_content %>%
-      select(-season, -cat_type) %>%
+      select(
+        -season,
+        -cat_type) %>%
       rename(
         year = yr,
         cat_id = cat_no,
@@ -33,12 +36,13 @@ make_BY2011_annual_area_source_CAP_and_GHG_emission_data <- function (
         `HFC+PFC` = HFC,
         SO2 = SOx)
 
-    validated <-
-      renamed %>%
+    validated_data <-
+      renamed_data %>%
       ensure(
         all_true(elide_year(.$year) %>% between(1990, 2030))) %>%
       ensure_distinct(
-        year, cat_id)
+        year,
+        cat_id)
 
     BY2011_POLLUTANT_LEVELS <- c(
       "PM", "TOG", "NOx", "SO2", "HFC+PFC",
@@ -47,17 +51,24 @@ make_BY2011_annual_area_source_CAP_and_GHG_emission_data <- function (
     msg("BY2011_POLLUTANT_LEVELS is: ",
         str_csv(BY2011_POLLUTANT_LEVELS))
 
-    tidied <-
-      validated %>%
+    gathered_data <-
+      validated_data %>%
       gather(
-        pol_abbr, ems_qty,
-        !!BY2011_POLLUTANT_LEVELS) %>%
-      filter(
-        ems_qty > 0) %>%
+        pol_abbr,
+        ems_qty,
+        !!BY2011_POLLUTANT_LEVELS)
+
+    tidied_data <-
+      gathered_data %>%
       select(
-        year, cat_id, pol_abbr, ems_qty) %>%
+        year,
+        cat_id,
+        pol_abbr,
+        ems_qty) %>%
       ensure_distinct(
-        year, cat_id, pol_abbr) %>%
+        year,
+        cat_id,
+        pol_abbr) %>%
       mutate_at(
         vars(cat_id),
         ~ as.integer(.)) %>%
@@ -66,10 +77,10 @@ make_BY2011_annual_area_source_CAP_and_GHG_emission_data <- function (
         ~ factor(., levels = BY2011_POLLUTANT_LEVELS))
 
     msg("converting units")
-    converted <-
-      tidied %>%
+    converted_data <-
+      tidied_data %>%
       mutate(
-        ems_unit = "ton/day") %>%
+        ems_unit = "ton/day") %>% # TODO: use set_emission_units()
       convert_emission_units(
         from = "ton/day",
         to = "ton/yr")
@@ -104,7 +115,7 @@ make_BY2011_annual_area_source_SF6_emission_data <- function (
 
   BY2011_annual_area_source_SF6_emission_data <- local({
 
-    transmuted <-
+    transmuted_data <-
       XLSX_content %>%
       transmute(
         year = as.integer(Year),
@@ -115,8 +126,8 @@ make_BY2011_annual_area_source_SF6_emission_data <- function (
       filter(
         year >= 1990)
 
-    converted <-
-      transmuted %>%
+    converted_data <-
+      transmuted_data %>%
       convert_emission_units(
         from = "ton/day",
         to = "ton/yr")
@@ -152,7 +163,7 @@ make_BY2011_annual_area_source_emission_data <- function (
       BY2011_annual_area_source_SF6_emission_data)
 
   msg("apportioning across counties")
-  apportioned_by_county <-
+  apportioned_data <-
     stacked_emission_data %>%
     apportion_to_counties(
       using = BY2011_county_fraction_data) %>%
@@ -160,7 +171,7 @@ make_BY2011_annual_area_source_emission_data <- function (
       cnty_frac)
 
   BY2011_annual_area_source_emission_data <-
-    apportioned_by_county %>%
+    apportioned_data %>%
     # mutate_at(
     #   vars(year),
     #   ~ if_else(

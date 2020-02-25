@@ -8,11 +8,11 @@ make_BY2011_county_fraction_data <- function (
     }
   }
 
-  msg("pulling from DataBank:::DB_county_fractions_()")
+  msg("pulling from DataBank:::DB_county_fractions()")
 
   DB_BY2011_county_fraction_data <-
-    DataBank:::DB_county_fractions_(
-      base_year = DataBank::BY(2011),
+    DataBank:::DB_county_fractions(
+      BY(2011),
       na.rm = FALSE)
 
   # historical_patches <- local({

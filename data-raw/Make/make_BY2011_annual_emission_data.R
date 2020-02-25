@@ -29,12 +29,48 @@ make_BY2011_annual_emission_data <- function (
 
   })
 
-  msg("dropping where ems_qty == 0")
-  filtered_data <-
-    stacked_speciated_data %>%
-    filter(ems_qty != 0) %>%
-    ensure(
-      all_true(.$ems_qty > 0))
+  #
+  # Group by (cat_id, pol_abbr). Then, filter out any group where the values
+  # are ALL zero.
+  #
+  # But, retain all data (including zeros) for each group in which at least
+  # one non-zero value occurs.
+  #
+  # This is different from previous behavior, which just used `filter(ems_qty
+  # > 0)` to filter out all zeros.
+  #
+  # This preserves the semi-missingness of some categories. For example,
+  # categories 1930:1931 are missing values for CY2005-2008.
+  #
+  # It also preserves the zeros in some (cat_id, pol_abbr) pairs. For example,
+  # inventoried CO emissions for BY2011 category #1598 are zero *except* for
+  # CY2001-2004.
+  #
+  # There are automated tests for all of the above. See `test-BY2011-cat_*.Rds`
+  # in the `tests/testthat/` directory.
+  #
+
+  msg("dropping (cat_id, cnty_abbr, pol_abbr) groups where emissions are entirely zero")
+
+  filtered_data <- local({
+
+    grouped_data <-
+      stacked_speciated_data %>%
+      group_by(
+        cat_id,
+        cnty_abbr,
+        pol_abbr)
+
+    pb <- progress_estimated(n_groups(grouped_data))
+
+    grouped_data %>%
+      group_map(
+        drop_zero_emissions,
+        keep = TRUE,
+        .pb = pb) %>%
+      bind_rows()
+
+  })
 
   BY2011_COUNTY_LEVELS <-
     c("ALA", "CC", "MAR", "NAP", "SF", "SM", "SON", "SOL", "SNC")

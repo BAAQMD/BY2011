@@ -22,6 +22,7 @@ sources:
   - "data-raw/Make/make_BY2011_legacy.R"
   - "data-raw/Make/make_BY2011_pollutant_data.R"
   - "data-raw/Make/apportion_to_counties.R"
+  - "data-raw/Make/drop_zero_emissions.R"
   - "data-raw/Make/speciate_TOG_and_PM.R"
   - "data-raw/Make/speciate_pollutant.R"
 

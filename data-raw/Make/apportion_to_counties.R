@@ -32,14 +32,14 @@ apportion_to_counties <- function (
 
   })
 
-  joined <-
+  joined_data <-
     left_join(
       emission_data,
       corrected_fraction_data,
       by = "cat_id")
 
-  apportioned <-
-    joined %>%
+  apportioned_data <-
+    joined_data %>%
     replace_na(
       list(cnty_frac = 1/9)) %>% # default: distribute equally
     mutate_at(
@@ -52,6 +52,6 @@ apportion_to_counties <- function (
   #     vars(cnty_abbr),
   #     ~ factor(., levels = BY2011_COUNTY_LEVELS))
 
-  return(apportioned)
+  return(apportioned_data)
 
 }

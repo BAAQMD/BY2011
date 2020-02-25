@@ -1,6 +1,7 @@
 .remake
 Meta
 Scratch
+data-raw/Archive
 
 # History files
 .Rhistory
