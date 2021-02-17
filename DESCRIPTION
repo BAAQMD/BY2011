@@ -9,12 +9,17 @@ License: What license is it under?
 Depends:
   tbltools,
   qtytools,
-  yeartools,
-  maketools
+  yeartools
+Remotes:
+  github::BAAQMD/tbltools,
+  github::BAAQMD/qtytools,
+  github::BAAQMD/yeartools,
+  github::BAAQMD/maketools
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.0.2
 Suggests: 
-    testthat (>= 2.1.0),
-    inventory
+  testthat (>= 2.1.0),
+  maketools,
+  inventory
 VignetteBuilder: knitr
